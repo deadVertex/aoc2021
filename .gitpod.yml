@@ -1,0 +1,6 @@
+tasks:
+  - init: |
+      docker pull haskell:9.2
+      echo 'TODO: build project'
+    command: |
+      echo 'TODO: start app'
