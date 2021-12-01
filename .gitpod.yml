@@ -1,6 +1,7 @@
 tasks:
   - init: |
-      docker pull haskell:9.2
+      sudo apt update
+      sudo apt install haskell-platform
       echo 'TODO: build project'
     command: |
       echo 'TODO: start app'
