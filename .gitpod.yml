@@ -1,7 +1,7 @@
 tasks:
   - init: |
       sudo apt update
-      sudo apt install haskell-platform
+      sudo apt install haskell-platform hlint
       echo 'TODO: build project'
     command: |
       echo 'TODO: start app'
