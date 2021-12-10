@@ -10,6 +10,9 @@ toBit '1' = 1
 bitn :: String -> Int -> Int
 bitn xs n = toBit (xs !! n)
 
+binary :: String -> [Int]
+binary xs = [ toBit x | x <- xs]
+
 transpose :: [String] -> [[Int]]
 transpose [] = []
 transpose xs = 
@@ -19,6 +22,9 @@ transpose xs =
 -- TODO: What about ties?
 mostCommon :: [Int] -> Int
 mostCommon xs = if sum xs > div (length xs) 2 then 1 else 0
+
+countIfBitSet :: [[Int]] -> Int -> Int
+countIfBitSet xs y = length (filter (\x -> x !! y == 1) xs)
 
 toInt :: [Int] -> Int
 toInt xs = 
@@ -43,11 +49,34 @@ calculatePowerConsumption xs =
         b = calculateEpsilon xs
     in a * b
 
+calculateLifeSupportRating :: [[Int]] -> Int
+calculateLifeSupportRating xs =
+    let a = toInt (filterOutUncommon xs 0)
+        b = toInt (filterOutCommon xs 0)
+    in a * b
+
+filterOutUncommon :: [[Int]] -> Int -> [Int]
+filterOutUncommon [x] y = x
+filterOutUncommon xs y =
+    let a = countIfBitSet xs y
+        b = (length xs) - a
+        c = if a >= b then 1 else 0
+    in filterOutUncommon (filter (\x -> x !! y == c) xs) (y+1)
+
+filterOutCommon :: [[Int]] -> Int -> [Int]
+filterOutCommon [x] y = x
+filterOutCommon xs y =
+    let a = countIfBitSet xs y
+        b = (length xs) - a
+        c = if b <= a then 0 else 1
+    in filterOutCommon (filter (\x -> x !! y == c) xs) (y+1)
+
 -- Application
 main = do
     handle <- openFile "input.txt" ReadMode
     contents <- hGetContents handle
-    print (calculatePowerConsumption (transpose (lines contents)))
+    --print (calculatePowerConsumption (transpose (lines contents)))
+    print (calculateLifeSupportRating (map binary (lines contents)))
 
 -- Unit Tests
 test1 = TestCase (assertEqual "transpose" [[1,0,1], [0,0,1], [1,1,0]] (transpose ["101", "001", "110"]))
@@ -59,6 +88,11 @@ test6 = TestCase (assertEqual "calculateGamma" 5 (calculateGamma [[1,0,1], [0,0,
 test7 = TestCase (assertEqual "calculatePowerConsumption" 10 (calculatePowerConsumption [[1,0,1], [0,0,1], [1,1,0]]))
 test8 = TestCase (assertEqual "calculateEpsilon" 2 (calculateEpsilon [[1,0,1], [0,0,1], [1,1,0]]))
 test9 = TestCase (assertEqual "calculatePowerConsumption testInput" 198 (calculatePowerConsumption (transpose testInput)))
+test10 = TestCase (assertEqual "binary" [1, 0, 1, 1] (binary "1011"))
+test12 = TestCase (assertEqual "countIfBitSet" 2 (countIfBitSet [[1, 0, 0], [0, 1, 1], [1, 0, 1]] 0))
+test13 = TestCase (assertEqual "filterOutUncommon" [1, 0, 1, 1, 1] (filterOutUncommon (map binary testInput) 0))
+test14 = TestCase (assertEqual "filterOutCommon" [0, 1, 0, 1, 0] (filterOutCommon (map binary testInput) 0))
+test15 = TestCase (assertEqual "calculateLifeSupportRating" 230 (calculateLifeSupportRating (map binary testInput)))
 
 tests = TestList [TestLabel "transpose" test1,
                   TestLabel "mostCommon 1" test2,
@@ -68,4 +102,9 @@ tests = TestList [TestLabel "transpose" test1,
                   TestLabel "calculateGamma" test6,
                   TestLabel "calculatePowerConsumption" test7,
                   TestLabel "calculateEpsilon" test8,
-                  TestLabel "calculatePowerConsumption testInput" test9]
+                  TestLabel "calculatePowerConsumption testInput" test9,
+                  TestLabel "binary" test10,
+                  TestLabel "countIfBitSet" test12,
+                  TestLabel "filterOutUncommon" test13,
+                  TestLabel "filterOutCommon" test14,
+                  TestLabel "calculateLifeSupportRating" test15]
